@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["strictUndefinedChecks"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+}
+
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+ 
+  email    String   @unique
+  name     String?
+  password String?
+  role    Role     @default(USER)
+  createdAt DateTime @default(now())
+ 
+  FuneralParlors FuneralParlor[] 
+  Bookings Booking[]
+}
+
+
+model FuneralParlor {
+  id       Int      @id @default(autoincrement())
+ 
+  name     String   @unique
+  description  String?
+  contact    String?
+  location   String?
+  createdAt DateTime @default(now())
+ 
+  userId    Int
+  user User  @relation(fields: [userId], references: [id])
+
+  services Service[]
+  assets Asset[]
+}
+
+
+model Service {
+  id       Int      @id @default(autoincrement())
+  
+  name     String   @unique
+  description  String?
+  rate    Float?
+  availability Boolean? @default(false)
+  createdAt DateTime @default(now())
+  
+  funeralParlorId Int
+  funeralParlor FuneralParlor @relation(fields: [funeralParlorId], references: [id])
+  
+  BookingDetail BookingDetail[]
+}
+
+model Booking {
+  id       Int      @id @default(autoincrement())
+
+  price    Float?
+  date     DateTime?
+  status   String?
+  createdAt DateTime @default(now())
+  
+  userId   Int
+  user    User     @relation(fields: [userId], references: [id])
+  
+  bookingDetail BookingDetail[]
+}
+
+model Asset {
+  id       Int      @id @default(autoincrement())
+  
+  name     String   @unique
+  description  String?
+  rate    Float?
+  quantity Int?
+  createdAt DateTime @default(now())
+  
+  funeralParlorId Int
+  funeralParlor FuneralParlor @relation(fields: [funeralParlorId], references: [id])
+
+  BookingDetail BookingDetail[]
+}
+
+model BookingDetail {
+  id        Int      @id @default(autoincrement())
+  unit      Int?
+  bookingId Int
+  booking   Booking?  @relation(fields: [bookingId], references: [id])
+  serviceId Int?  //can be null
+  service   Service? @relation(fields: [serviceId], references: [id])
+  assetId   Int? // can be null
+  asset     Asset?   @relation(fields: [assetId], references: [id])
+}
