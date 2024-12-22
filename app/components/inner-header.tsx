@@ -9,7 +9,7 @@ interface OptionProps {
     link: string
 }
 
-export default function Header() {
+export default function InnerHeader() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const pathname = usePathname()
 
