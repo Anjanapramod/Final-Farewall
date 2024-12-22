@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prismaClient } from "@/app/database/DatabaseClient";
-import { StandardResponse } from "@/app/helpers/types/response";
+import { StandardResponse } from "@/app/helpers/types/response.type";
 
 // Find by ID - FuneralParlor
 export async function GET(req: Request) {
@@ -12,8 +12,9 @@ export async function GET(req: Request) {
     if (!id || typeof id !== "string" || isNaN(Number(id))) {
       const response: StandardResponse = {
         message: "Invalid or missing funeral parlor ID",
+        code: 400,
       };
-      return NextResponse.json(response, { status: 400 });
+      return NextResponse.json(response);
     }
 
     // Fetch the funeral parlor by ID

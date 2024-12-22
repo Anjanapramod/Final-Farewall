@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prismaClient } from "@/app/database/DatabaseClient";
-import { StandardResponse } from "@/app/helpers/types/response";
+import { StandardResponse } from "@/app/helpers/types/response.type";
 
 // Save FuneralParlor
 export async function POST(request: NextRequest) {
@@ -14,9 +14,10 @@ export async function POST(request: NextRequest) {
     if (!name || !description || !contact || !location || !userId) {
       const response: StandardResponse = {
         message:
-          "Name, description, contact, location, and userId are required"
+          "Name, description, contact, location, and userId are required",
+        code: 400,
       };
-      return NextResponse.json(response, { status: 400 });
+      return NextResponse.json(response);
     }
 
     // Check if user exists
@@ -27,8 +28,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
       const response: StandardResponse = {
         message: "User with this ID does not exist",
+        code: 404,
       };
-      return NextResponse.json(response, { status: 404 });
+      return NextResponse.json(response);
     }
 
     // Check if funeral parlor with the same name exists
@@ -38,10 +40,11 @@ export async function POST(request: NextRequest) {
 
     if (existingFuneralParlor) {
       const response: StandardResponse = {
+        code: 409,
         message:
-          "Funeral parlor with this name already exists, Try a different name."
+          "Funeral parlor with this name already exists, Try a different name.",
       };
-      return NextResponse.json(response, { status: 409 });
+      return NextResponse.json(response);
     }
 
     // Create new funeral parlor
@@ -56,19 +59,21 @@ export async function POST(request: NextRequest) {
     });
 
     const response: StandardResponse = {
+      code: 201,
       message: "Funeral parlor saved successfully",
       data: funeralParlor,
     };
 
-    return NextResponse.json(response, { status: 201 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error saving funeral parlor:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Failed to save funeral parlor";
     const response: StandardResponse = {
-      message: errorMessage
+      message: errorMessage,
+      code: 500,
     };
-    return NextResponse.json(response, { status: 500 });
+    return NextResponse.json(response);
   }
 }
 
@@ -80,9 +85,10 @@ export async function GET() {
     const response: StandardResponse = {
       message: "Funeral parlors fetched successfully",
       data: funeralParlors,
+      code: 200,
     };
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching funeral parlors:", error);
     const errorMessage =
@@ -90,7 +96,7 @@ export async function GET() {
         ? error.message
         : "Failed to fetch funeral parlors";
     const response: StandardResponse = {
-      message: errorMessage
+      message: errorMessage,
     };
     return NextResponse.json(response, { status: 500 });
   }

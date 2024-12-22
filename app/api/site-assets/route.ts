@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prismaClient } from "@/app/database/DatabaseClient";
-import { StandardResponse } from "@/app/helpers/types/response";
+import { StandardResponse } from "@/app/helpers/types/response.type";
 
 // Create Asset
 export async function POST(request: NextRequest) {

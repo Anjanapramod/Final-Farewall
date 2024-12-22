@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prismaClient } from "@/app/database/DatabaseClient";
-import { StandardResponse } from "@/app/helpers/types/response";
+import { StandardResponse } from "@/app/helpers/types/response.type";
 
 // READ Service by ID
 async function getServiceById(id: string) {
