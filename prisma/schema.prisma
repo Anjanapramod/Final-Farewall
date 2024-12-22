@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["strictUndefinedChecks"]
+  // previewFeatures = ["strictUndefinedChecks"]
 }
 
 datasource db {
@@ -15,35 +15,33 @@ enum Role {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
- 
-  email    String   @unique
-  name     String?
-  password String?
-  role    Role     @default(USER)
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String?
+  role      Role     @default(USER)
   createdAt DateTime @default(now())
- 
-  FuneralParlors FuneralParlor[] 
+
+  funeralParlor FuneralParlor?
+
   Bookings Booking[]
 }
 
 
 model FuneralParlor {
-  id       Int      @id @default(autoincrement())
- 
-  name     String   @unique
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
   description  String?
-  contact    String?
-  location   String?
+  contact   String?
+  location  String?
   createdAt DateTime @default(now())
- 
-  userId    Int
-  user User  @relation(fields: [userId], references: [id])
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
 
   services Service[]
-  assets Asset[]
+  assets   Asset[]
 }
-
 
 model Service {
   id       Int      @id @default(autoincrement())

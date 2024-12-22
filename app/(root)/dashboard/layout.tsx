@@ -1,7 +1,7 @@
 "use client";
-import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
+import Footer from '@/app/components/footer';
 import React from 'react'
+import InnerHeader from "@/app/components/inner-header";
 
 const Layout = ({
     children,
@@ -12,8 +12,8 @@ const Layout = ({
         <div
             className='flex flex-col h-screen'
         >
-            <Header />
-            <div className='flex-1 overflow-y-auto'>
+            <InnerHeader />
+            <div className='flex-1 overflow-y-auto min-h-screen'>
                 {children}
             </div>
             <Footer />
