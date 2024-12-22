@@ -1,5 +1,5 @@
 "use client";
-import Footer from '@/app/components/footer';
+import FooterNew from '@/app/components/footer';
 import React from 'react'
 import InnerHeader from "@/app/components/inner-header";
 
@@ -16,7 +16,7 @@ const Layout = ({
             <div className='flex-1 overflow-y-auto min-h-screen'>
                 {children}
             </div>
-            <Footer />
+            <FooterNew />
         </div>
     )
 }
