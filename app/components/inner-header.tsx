@@ -50,7 +50,7 @@ export default function InnerHeader() {
                                 key={index}
                                 href={option.link}
                                 className={`text-sm transition-colors hover:text-gray-300 ${pathname === option.link ? 'text-white' : 'text-gray-400'
-                                    }`}
+                                }`}
                             >
                                 {option.name}
                             </Link>
@@ -110,7 +110,7 @@ export default function InnerHeader() {
                                 className={`block rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-gray-700 hover:text-white ${pathname === option.link
                                     ? 'bg-gray-900 text-white'
                                     : 'text-gray-300'
-                                    }`}
+                                }`}
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 {option.name}

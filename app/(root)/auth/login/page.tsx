@@ -1,9 +1,9 @@
 "use client"
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { postLogin } from "@/app/store/slices/userSlice";
-import { RootState, AppDispatch } from "@/app/store/store";
+import {useEffect, useState} from "react";
+import {useRouter} from "next/navigation";
+import {useDispatch, useSelector} from "react-redux";
+import {postLogin} from "@/app/store/slices/userSlice";
+import {AppDispatch, RootState} from "@/app/store/store";
 import Link from "next/link";
 
 export default function Page() {
@@ -84,10 +84,8 @@ export default function Page() {
 
                     <button
                         type="submit"
-                        className="button"
-                        disabled={status === "loading"}
-                    >
-                        {status === "loading" ? "Signing In..." : "Sign In"}
+                        className="button">
+                        Sign In
                     </button>
                 </form>
 

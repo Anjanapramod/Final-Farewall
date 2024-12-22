@@ -82,6 +82,9 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "FuneralParlor_name_key" ON "FuneralParlor"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "FuneralParlor_userId_key" ON "FuneralParlor"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Service_name_key" ON "Service"("name");
 
 -- CreateIndex

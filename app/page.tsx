@@ -1,8 +1,7 @@
 "use client"
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Header from "./components/header";
-import Footer from "./components/footer";
+
+import HeaderNew from "./components/header";
+import FooterNew from "./components/footer";
 import HeroSection from "./components/hero-section";
 import FeaturesSection from "./components/features-section";
 import HowItWorksSection from "./components/how-it-works-section";
@@ -10,15 +9,12 @@ import TestimonialsSection from "./components/testimonials-section";
 import CTASection from "./components/cta-section";
 
 export default function Home() {
-  const router = useRouter();
-  useEffect(() => {
-    router.push("/auth/login");
-  }, [router]);
+
 
   return (
 
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <HeaderNew />
       <main>
         <HeroSection />
         <FeaturesSection />
@@ -26,7 +22,7 @@ export default function Home() {
         <TestimonialsSection />
         <CTASection />
       </main>
-      <Footer />
+      <FooterNew />
     </div>
   );
 }
