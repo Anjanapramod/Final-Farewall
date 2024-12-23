@@ -75,7 +75,10 @@ export default function FuneralParlorListing() {
                     {parlor.description}
                   </div>
                   <div className="flex justify-end">
-                    <Link href={`/user/booking/${parlor.id}`} passHref>
+                    <Link
+                      href={`/dashboard/user/booking/${parlor.id}`}
+                      passHref
+                    >
                       <Button>Book Now</Button>
                     </Link>
                   </div>
