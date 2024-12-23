@@ -8,6 +8,7 @@ import { MapPin, Phone, Info } from "lucide-react";
 import { AppDispatch, RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { getFuneralParlor } from "../store/slices/funeralParlorSlice";
+import Link from "next/link";
 
 export default function FuneralParlorListing() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,7 +75,9 @@ export default function FuneralParlorListing() {
                     {parlor.description}
                   </div>
                   <div className="flex justify-end">
-                    <Button>Book Now</Button>
+                    <Link href={`/user/booking/${parlor.id}`} passHref>
+                      <Button>Book Now</Button>
+                    </Link>
                   </div>
                 </div>
               </CardContent>
