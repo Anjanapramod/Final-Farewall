@@ -136,7 +136,7 @@ export async function PUT(request: NextRequest) {
 }
 
 // Delete Asset
-export async function DELETE(req: NextRequest) {
+export async function DELETE(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 

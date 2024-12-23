@@ -3,26 +3,34 @@ import { prismaClient } from "@/app/database/DatabaseClient";
 import { StandardResponse } from "@/app/helpers/types/response.type";
 
 // GET All Services
-export async function GET() {
-  try {
-    // Fetch all services from the database
-    const services = await prismaClient.service.findMany({
-      include: {
-        funeralParlor: false, // Optionally include related funeral parlor data
-      },
-    });
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const funeralParlorId = searchParams.get("funeralParlorId");
 
-    // Check if any services exist
-    if (services.length === 0) {
-      return NextResponse.json(
-        { message: "No services found", status: 404 },
-        { status: 404 }
-      );
+  try {
+    let services;
+    if (funeralParlorId) {
+      const funeralParlor = await prismaClient.funeralParlor.findUnique({
+        where: { id: parseInt(funeralParlorId, 10) },
+      });
+
+      if (!funeralParlor) {
+        return NextResponse.json(
+          { message: "Funeral parlor not found", code: 404 }
+        );
+      }
+
+      services = await prismaClient.service.findMany({
+        where: { funeralParlorId: parseInt(funeralParlorId, 10) },
+      });
+    } else {
+      services = await prismaClient.service.findMany();
     }
 
     const response: StandardResponse = {
       message: "Services fetched successfully",
-      data: services, // Include the list of services in the response
+      data: services,
+      code: 200,
     };
 
     return NextResponse.json(response, { status: 200 });
@@ -30,7 +38,11 @@ export async function GET() {
     console.error("Error fetching services:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Failed to fetch services";
-    return NextResponse.json({ message: errorMessage, status: 500 });
+
+    return NextResponse.json(
+      { message: errorMessage, code: 500 },
+      { status: 500 }
+    );
   }
 }
 
@@ -44,8 +56,7 @@ export async function POST(request: NextRequest) {
     // Validate request body
     if (!name || !funeralParlorId) {
       return NextResponse.json(
-        { message: "Name and funeral parlor ID are required", status: 400 },
-        { status: 400 }
+        { message: "Name and funeral parlor ID are required", code: 400 },
       );
     }
 
@@ -56,8 +67,8 @@ export async function POST(request: NextRequest) {
 
     if (!funeralParlor) {
       return NextResponse.json(
-        { message: "Funeral parlor not found", status: 404 },
-        { status: 404 }
+        { message: "Funeral parlor not found", code: 404 },
+
       );
     }
 
@@ -68,8 +79,8 @@ export async function POST(request: NextRequest) {
 
     if (existingService) {
       return NextResponse.json(
-        { message: "Service with this name already exists", status: 409 },
-        { status: 409 }
+        { message: "Service with this name already exists", code: 409 },
+
       );
     }
 
@@ -88,13 +99,14 @@ export async function POST(request: NextRequest) {
     const response: StandardResponse = {
       message: "Service created successfully",
       data: service, // Include the created service in the response
+      code: 201,
     };
 
-    return NextResponse.json(response, { status: 201 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error creating service:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Failed to create service";
-    return NextResponse.json({ message: errorMessage, status: 500 });
+    return NextResponse.json({ message: errorMessage, code: 500 });
   }
 }

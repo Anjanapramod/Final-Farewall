@@ -83,6 +83,7 @@ const userSlice = createSlice({
         // LOGIN CASES
         builder.addCase(postLogin.fulfilled, (state, action) => {
             state.user = action.payload as User;
+            localStorage.setItem("user", JSON.stringify(state.user));
             console.log("User logged in:", state.user);
             state.error = null;
         });

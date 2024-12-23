@@ -72,8 +72,8 @@ export default function ManageAssets() {
     };
 
     return (
-        <div className="mt-6 max-w-7xl mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-8">Manage Assets</h1>
+        <div className="container max-w-7xl min-h-fit  p-6 mx-auto">
+            <h1 className="text-4xl font-bold mb-8">Manage Assets</h1>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Form */}
                 <div className="bg-white rounded-lg shadow-md p-6 col-span-1">

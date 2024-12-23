@@ -2,12 +2,27 @@ import { NextResponse } from "next/server";
 import { prismaClient } from "@/app/database/DatabaseClient";
 import { StandardResponse } from "@/app/helpers/types/response.type";
 
-// Find by ID - FuneralParlor
+// Find by user id or FuneralParlor id
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
-
+  const userId = searchParams.get("userId");
   try {
+    if (userId) {
+      const funeralParlorByUserId = await prismaClient.funeralParlor.findUnique(
+        {
+          where: { userId: parseInt(userId, 10) },
+        }
+      );
+
+      const response: StandardResponse = {
+        message: "Funeral parlor found",
+        data: funeralParlorByUserId,
+        code: 200,
+      };
+      return NextResponse.json(response);
+    }
+
     // Validate ID parameter
     if (!id || typeof id !== "string" || isNaN(Number(id))) {
       const response: StandardResponse = {
@@ -26,8 +41,9 @@ export async function GET(req: Request) {
     if (!funeralParlor) {
       const response: StandardResponse = {
         message: "Funeral parlor not found",
+        code: 404,
       };
-      return NextResponse.json(response, { status: 404 });
+      return NextResponse.json(response);
     }
 
     // Return the found funeral parlor data
@@ -131,8 +147,9 @@ export async function PUT(req: Request) {
     const response: StandardResponse = {
       message: "Funeral parlor updated successfully",
       data: updatedFuneralParlor,
+      code: 200,
     };
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error updating funeral parlor:", error);
 

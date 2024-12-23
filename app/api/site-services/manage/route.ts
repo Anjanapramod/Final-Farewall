@@ -14,16 +14,20 @@ async function getServiceById(id: string) {
 
     if (!service) {
       return NextResponse.json(
-        { message: "Service not found" },
-        { status: 404 }
+        {
+          message: "Service not found",
+          code: 404
+        }
       );
     }
 
     const response: StandardResponse = {
       message: "Service found",
       data: service,
+      code: 201
     };
-    return NextResponse.json(response, { status: 200 });
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching service:", error);
     const errorMessage =
@@ -54,8 +58,9 @@ export async function GET(req: NextRequest) {
       const response: StandardResponse = {
         message: "Services fetched successfully",
         data: services,
+        code: 200
       };
-      return NextResponse.json(response, { status: 200 });
+      return NextResponse.json(response);
     }
 
     const services = await prismaClient.service.findMany();
