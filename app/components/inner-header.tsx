@@ -70,6 +70,17 @@ export default function InnerHeader() {
                 {option.name}
               </Link>
             ))}
+            <button
+              onClick={() => {
+                localStorage.removeItem("role");
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "/";
+              }}
+              className="text-sm transition-colors hover:text-gray-300 text-gray-400"
+            >
+              Logout
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}
