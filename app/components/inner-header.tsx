@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,7 +14,15 @@ export default function InnerHeader() {
   const pathname = usePathname();
 
   // Mock user role (replace with actual role management logic)
-  const role: string = JSON.parse(localStorage.getItem("role") as string);
+  // const role: string = JSON.parse(localStorage.getItem("role") as string);
+
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const roleString = localStorage.getItem("role");
+    const role = roleString ? JSON.parse(roleString) : null;
+    setRole(role);
+  }, []);
 
   const options: OptionProps[] =
     role === "ADMIN"
@@ -26,11 +34,11 @@ export default function InnerHeader() {
           },
           { name: "Manage Services", link: "/dashboard/admin/manage-services" },
           { name: "Manage Assets", link: "/dashboard/admin/manage-assets" },
-          { name: "Bookings", link: "/dashboard/admin/bookings" },
+          { name: "Bookings", link: "/dashboard/admin/manage-bookings" },
         ]
       : [
           { name: "Funeral Homes", link: "/dashboard/user" },
-          { name: "Bookings", link: "/dashboard/user/booking" },
+          { name: "Bookings", link: "/dashboard/user/my-booking" },
         ];
 
   return (
