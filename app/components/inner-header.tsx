@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,28 +14,31 @@ export default function InnerHeader() {
   const pathname = usePathname();
 
   // Mock user role (replace with actual role management logic)
-  const user = {
-    role: "ADMIN", // Change to 'USER' to test user-specific options
-  };
+  // const role: string = JSON.parse(localStorage.getItem("role") as string);
+
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const roleString = localStorage.getItem("role");
+    const role = roleString ? JSON.parse(roleString) : null;
+    setRole(role);
+  }, []);
 
   const options: OptionProps[] =
-    user.role === "ADMIN"
+    role === "ADMIN"
       ? [
-          { name: "Home", link: "/dashboard/admin" },
+          // { name: "Home", link: "/dashboard/admin" },
           {
             name: "Manage Funeral Parlors",
             link: "/dashboard/admin/manage-funeral-parlors",
           },
           { name: "Manage Services", link: "/dashboard/admin/manage-services" },
           { name: "Manage Assets", link: "/dashboard/admin/manage-assets" },
-          { name: "Bookings", link: "/dashboard/admin/bookings" },
+          { name: "Bookings", link: "/dashboard/admin/manage-bookings" },
         ]
       : [
-          { name: "Home", link: "/" },
-          { name: "Services", link: "/services" },
-          { name: "Funeral Parlors", link: "/funeral-parlors" },
-          { name: "Assets", link: "/assets" },
-          { name: "Bookings", link: "/bookings" },
+          { name: "Funeral Homes", link: "/dashboard/user" },
+          { name: "Bookings", link: "/dashboard/user/my-booking" },
         ];
 
   return (
@@ -43,7 +46,14 @@ export default function InnerHeader() {
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="text-xl font-semibold">
+          <Link
+            href={
+              role === "ADMIN"
+                ? "/dashboard/admin/manage-funeral-parlors"
+                : "/dashboard/user"
+            }
+            className="text-xl font-semibold"
+          >
             Final Farewell
           </Link>
 
@@ -60,6 +70,17 @@ export default function InnerHeader() {
                 {option.name}
               </Link>
             ))}
+            <button
+              onClick={() => {
+                localStorage.removeItem("role");
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "/";
+              }}
+              className="text-sm transition-colors hover:text-gray-300 text-gray-400"
+            >
+              Logout
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}

@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 
 const layout = ({
@@ -24,6 +25,15 @@ const layout = ({
             <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
           </svg>
           Funeral Services
+        </div>
+        <div className="relative z-20 flex justify-start items-center text-lg font-medium h-5/6">
+          <Image
+            src={"/image.jpg"}
+            alt="Funeral Services"
+            width={750}
+            height={500}
+            className="rounded-lg"
+          />
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
