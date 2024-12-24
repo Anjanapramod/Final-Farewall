@@ -1,27 +1,20 @@
 "use client";
-
 import FooterNew from "@/app/components/footer";
+import React from "react";
 import InnerHeader from "@/app/components/inner-header";
 
 const Layout = ({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) => {
-    return (
-        <div className="flex flex-col min-h-screen">
-            {/* Header Section */}
-            <InnerHeader />
-
-            {/* Main Content Area */}
-            <main className="flex flex-col flex-grow overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 ">
-                {children}
-            </main>
-
-            {/* Footer Section */}
-            <FooterNew />
-        </div>
-    );
+  return (
+    <div className="flex flex-col h-screen">
+      <InnerHeader />
+      <div className="flex-1 overflow-y-auto min-h-screen">{children}</div>
+      <FooterNew />
+    </div>
+  );
 };
 
 export default Layout;
