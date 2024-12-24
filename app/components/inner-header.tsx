@@ -14,14 +14,12 @@ export default function InnerHeader() {
   const pathname = usePathname();
 
   // Mock user role (replace with actual role management logic)
-  const user = {
-    role: "ADMIN", // Change to 'USER' to test user-specific options
-  };
+  const role: string = JSON.parse(localStorage.getItem("role") as string);
 
   const options: OptionProps[] =
-    user.role === "ADMIN"
+    role === "ADMIN"
       ? [
-          { name: "Home", link: "/dashboard/admin" },
+          // { name: "Home", link: "/dashboard/admin" },
           {
             name: "Manage Funeral Parlors",
             link: "/dashboard/admin/manage-funeral-parlors",
@@ -31,11 +29,8 @@ export default function InnerHeader() {
           { name: "Bookings", link: "/dashboard/admin/bookings" },
         ]
       : [
-          { name: "Home", link: "/" },
-          { name: "Services", link: "/services" },
-          { name: "Funeral Parlors", link: "/funeral-parlors" },
-          { name: "Assets", link: "/assets" },
-          { name: "Bookings", link: "/bookings" },
+          { name: "Funeral Homes", link: "/dashboard/user" },
+          { name: "Bookings", link: "/dashboard/user/booking" },
         ];
 
   return (

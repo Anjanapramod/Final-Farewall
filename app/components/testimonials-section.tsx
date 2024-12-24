@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { CircleUserRound } from "lucide-react";
 
 export default function TestimonialsSection() {
   const testimonials = [
@@ -27,13 +27,7 @@ export default function TestimonialsSection() {
             <div key={index} className="bg-white p-6 rounded-lg shadow-md">
               <p className="mb-4 text-gray-600 italic">{testimonial.quote}</p>
               <div className="flex items-center">
-                <Image
-                  src={`/placeholder.svg?height=50&width=50`}
-                  width={50}
-                  height={50}
-                  alt={testimonial.author}
-                  className="rounded-full mr-4"
-                />
+                <CircleUserRound className="w-20 h-20 text-red-500 p-3" />
                 <div>
                   <p className="font-semibold">{testimonial.author}</p>
                   <p className="text-gray-600 text-sm">{testimonial.role}</p>
