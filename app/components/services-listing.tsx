@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,51 +12,35 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-// This would typically come from an API or database
-const services = [
-  {
-    id: 1,
-    name: "Basic Funeral Service",
-    description: "A simple, dignified service for your loved one.",
-    rate: "$2,500",
-    availability: true,
-  },
-  {
-    id: 2,
-    name: "Memorial Service",
-    description: "A beautiful ceremony celebrating the life of the deceased.",
-    rate: "$3,000",
-    availability: true,
-  },
-  {
-    id: 3,
-    name: "Graveside Service",
-    description: "A intimate service held at the burial site.",
-    rate: "$2,000",
-    availability: false,
-  },
-  {
-    id: 4,
-    name: "Cremation Service",
-    description: "A respectful cremation with optional viewing.",
-    rate: "$1,800",
-    availability: true,
-  },
-  {
-    id: 5,
-    name: "Full Traditional Funeral",
-    description:
-      "A comprehensive funeral service with all traditional elements.",
-    rate: "$5,000",
-    availability: true,
-  },
-];
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "next/navigation";
+import { AppDispatch, RootState } from "../store/store";
+import { getAllByParlorId } from "../store/slices/servicesSlice";
+import { Service } from "../helpers/types/service.types";
+import { BookingModal } from "../components/service-booking-model";
 
 export default function ServicesListing() {
-  const [bookedServices, setBookedServices] = useState<number[]>([]);
+  const params = useParams();
+  const dispatch = useDispatch<AppDispatch>();
+  const { services } = useSelector((state: RootState) => state.services);
 
-  const handleBooking = (serviceId: number) => {
-    setBookedServices((prev) => [...prev, serviceId]);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (params?.id) {
+      dispatch(getAllByParlorId(Number(params.id)));
+    }
+  }, [params, dispatch]);
+
+  const handleOpenServiceModal = (service: Service) => {
+    setSelectedService(service);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedService(null);
+    setIsModalOpen(false);
   };
 
   return (
@@ -64,35 +48,53 @@ export default function ServicesListing() {
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-8">Our Services</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service) => (
-            <Card key={service.id}>
-              <CardHeader>
-                <CardTitle>{service.name}</CardTitle>
-                <CardDescription>{service.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{service.rate}</p>
-                <Badge
-                  variant={service.availability ? "default" : "secondary"}
-                  className="mt-2"
-                >
-                  {service.availability ? "Available" : "Currently Unavailable"}
-                </Badge>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  onClick={() => handleBooking(service.id)}
-                  disabled={
-                    !service.availability || bookedServices.includes(service.id)
-                  }
-                >
-                  {bookedServices.includes(service.id) ? "Booked" : "Book Now"}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+          {services &&
+            services.map((service: Service) => (
+              <Card key={service.id}>
+                <CardHeader>
+                  <CardTitle>{service.name}</CardTitle>
+                  <CardDescription>{service.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold">{service.rate}</p>
+                  <Badge
+                    variant={service.availability ? "default" : "destructive"}
+                    className="mt-2"
+                  >
+                    {service.availability
+                      ? "Available"
+                      : "Currently Unavailable"}
+                  </Badge>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    onClick={() => handleOpenServiceModal(service)}
+                    disabled={!service.availability}
+                    className={`${
+                      !service.availability
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    {service.availability ? "Book Now" : "Unavailable"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
         </div>
       </div>
+
+      {selectedService && (
+        <BookingModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onConfirm={(bookingData) => {
+            console.log("Booking confirmed:", bookingData);
+            handleCloseModal();
+          }}
+          service={selectedService}
+        />
+      )}
     </section>
   );
 }
