@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function CTASection() {
+  const router = useRouter();
   return (
     <section className="py-20 bg-gray-800 text-white">
       <div className="container mx-auto px-4 text-center">
@@ -15,10 +17,20 @@ export default function CTASection() {
             size="lg"
             variant="outline"
             className="bg-white text-gray-800 hover:bg-gray-100"
+            onClick={() => {
+              router.push("/auth/register");
+            }}
           >
             Sign Up as a Funeral Home
           </Button>
-          <Button size="lg">Find a Funeral Home</Button>
+          <Button
+            onClick={() => {
+              router.push("/auth/register");
+            }}
+            size="lg"
+          >
+            Find a Funeral Home
+          </Button>
         </div>
       </div>
     </section>

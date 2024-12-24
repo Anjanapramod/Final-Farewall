@@ -42,7 +42,9 @@ const Page = () => {
     dispatch(postRegister(formData));
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -57,7 +59,7 @@ const Page = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "ADMIN",
+      role: "USER",
     });
   };
 
@@ -136,6 +138,23 @@ const Page = () => {
               placeholder="Confirm your password"
               className="input"
             />
+          </div>
+
+          {/* Role Selection Dropdown */}
+          <div className="flex flex-col space-y-2">
+            <label htmlFor="role" className="text-sm font-medium">
+              Role
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="input"
+            >
+              <option value="USER">Family</option>
+              <option value="ADMIN">Funeral Home</option>
+            </select>
           </div>
 
           {/* Submit Button */}
