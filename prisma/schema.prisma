@@ -55,21 +55,23 @@ model Service {
   funeralParlorId Int
   funeralParlor FuneralParlor @relation(fields: [funeralParlorId], references: [id])
   
-  BookingDetail BookingDetail[]
 }
 
 model Booking {
   id       Int      @id @default(autoincrement())
 
   price    Float?
-  date     DateTime?
-  status   String?
-  createdAt DateTime @default(now())
+  createdAt DateTime? @default(now())
   
   userId   Int
   user    User     @relation(fields: [userId], references: [id])
-  
-  bookingDetail BookingDetail[]
+
+  serviceId Int?
+  bookedDate DateTime?
+
+  assertId  Int?
+  assetQty Int?
+
 }
 
 model Asset {
@@ -83,21 +85,5 @@ model Asset {
   
   funeralParlorId Int
   funeralParlor FuneralParlor @relation(fields: [funeralParlorId], references: [id])
-
-  BookingDetail BookingDetail[]
-}
-
-model BookingDetail {
-  id        Int      @id @default(autoincrement())
-  unit      Int?
-
-  bookingId Int
-  booking   Booking?  @relation(fields: [bookingId], references: [id])
-  
-  serviceId Int?  //can be null
-  service   Service? @relation(fields: [serviceId], references: [id])
-  
-  assetId   Int? // can be null
-  asset     Asset?   @relation(fields: [assetId], references: [id])
 
 }

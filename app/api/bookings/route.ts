@@ -1,146 +1,108 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prismaClient } from "@/app/database/DatabaseClient";
-// import { Prisma } from "@prisma/client";
+import { StandardResponse } from "@/app/helpers/types/response.type";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { status, userId, bookingDetails } = body;
+    console.log("Saving booking...");
 
-    if (!status || !userId || !Array.isArray(bookingDetails)) {
-      return NextResponse.json({
-        success: false,
-        message: "Invalid input: status, userId, and bookingDetails are required"
-      }, { status: 400 });
+    // Parse request body
+    const { price, userId, serviceId, assertId, assetQty, bookedDate } =
+      await request.json();
+
+    console.log("Request body: ", {
+      price,
+      userId,
+      serviceId,
+      assertId,
+      assetQty,
+      bookedDate,
+    });
+
+    // Validate required fields
+    if (!price || !userId) {
+      const response: StandardResponse = {
+        message: "Missing required fields: price or userId",
+        code: 400,
+      };
+      return NextResponse.json(response);
     }
 
-    const result = await prismaClient.$transaction(async (tx) => {
-      // First, get or create default service and asset
-
-      const defaultService = await tx.service.findFirst();
-      const defaultAsset = await tx.asset.findFirst();
-
-      if (!defaultService || !defaultAsset) {
-        throw new Error("Default service and asset must exist in the database");
-      }
-
-      // Check if user exists
-      const user = await tx.user.findUnique({
-        where: { id: userId }
+    // If `assertId` and `assetQty` are provided
+    if (assertId !== 0 && assetQty !== 0) {
+      // Validate asset availability
+      const asset = await prismaClient.asset.findUnique({
+        where: { id: assertId },
       });
 
-      if (!user) {
-        throw new Error(`User with ID ${userId} not found`);
+      if (!asset || asset.quantity === null || asset.quantity < assetQty) {
+        const response: StandardResponse = {
+          message: "Asset not available or insufficient quantity",
+          code: 404,
+        };
+        return NextResponse.json(response);
       }
 
-      // Create initial booking
-      const booking = await prismaClient.booking.create({
+      // Update asset quantity
+      const updatedQty = asset.quantity - assetQty;
+      await prismaClient.asset.update({
+        where: { id: assertId },
+        data: { quantity: updatedQty },
+      });
+
+      // Save booking with asset details
+      await prismaClient.booking.create({
         data: {
-          status,
+          price,
           userId,
-          price: 0,
-          date: new Date(),
+          assertId,
+          assetQty,
+
         },
       });
-
-      console.log("Booking created:", booking);
-
-      let totalPrice = 0;
-
-      // Process services and assets
-      for (const detail of bookingDetails) {
-        if (detail.serviceId) {
-          const service = await tx.service.findUnique({
-            where: { id: detail.serviceId }
-          });
-
-          if (!service) {
-            throw new Error(`Service with ID ${detail.serviceId} not found`);
-          }
-          if (!service.availability) {
-            throw new Error(`Service with ID ${detail.serviceId} is not available`);
-          }
-
-          totalPrice += service.rate ?? 0;
-          await tx.bookingDetail.create({
-            data: {
-              bookingId: booking.id,
-              serviceId: service.id,
-              assetId: undefined,
-              unit: 1,
-              // booking: Prisma.skip
-            }
-          });
-        }
-
-        if (detail.assetId) {
-          const asset = await tx.asset.findUnique({
-            where: { id: detail.assetId }
-          });
-
-          if (!asset) {
-            throw new Error(`Asset with ID ${detail.assetId} not found`);
-          }
-          if (!asset.quantity || asset.quantity < (detail.unit ?? 0)) {
-            throw new Error(`Insufficient quantity for asset ID ${detail.assetId}`);
-          }
-          if (!detail.unit || detail.unit <= 0) {
-            throw new Error(`Invalid unit quantity for asset ID ${detail.assetId}`);
-          }
-
-          await tx.asset.update({
-            where: { id: asset.id },
-            data: { quantity: asset.quantity - detail.unit }
-          });
-
-          totalPrice += (asset.rate ?? 0) * detail.unit;
-          await tx.bookingDetail.create({
-            data: {
-              bookingId: booking.id,
-              assetId: asset.id,
-              serviceId: undefined,  // Set serviceId to null if it's not provided
-              unit: detail.unit,
-
-            }
-          });
-
-        }
-      }
-
-      // Update booking with final price
-      return await tx.booking.update({
-        where: { id: booking.id },
-        data: { price: totalPrice },
-        include: {
-          bookingDetail: {
-
-            // include: {
-            //   service: true,
-            //   asset: true
-            // }
-          }
-        }
-      });
-    });
-
-    // Return success response
-    return NextResponse.json({
-      success: true,
-      message: "Booking created successfully",
-      data: result
-    });
-
-  } catch (error) {
-    // Ensure we always return an object
-    if (error instanceof Error) {
-      console.log(error.message);
     } else {
-      console.log(String(error));
+      // Validate `serviceId` when not using assets
+      if (!serviceId) {
+        const response: StandardResponse = {
+          message: "Missing required field: serviceId",
+          code: 400,
+        };
+        return NextResponse.json(response);
+      }
+      console.log("---------------------------------");
+      // Save booking without asset details
+      const k = {
+        data: {
+          price: 100,
+          userId: 1,
+          bookedDate: new Date(),
+          assetQty: 0,
+          serviceId: 1,
+          assertId: 0, // Default `assertId` when not applicable
+          createdAt: new Date(),
+        },
+      };
+      const r = await prismaClient.booking.create(k);
+      console.log(r)
     }
-    return NextResponse.json({
-      success: false,
-      message: error instanceof Error ? error.message : "Failed to create booking",
-      error: error instanceof Error ? error.stack : 'Unknown error'
-    }, { status: 500 });
+
+    // Successful response
+    const response: StandardResponse = {
+      code: 201,
+      message: "Booking saved successfully!",
+    };
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error("Error saving booking: ", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unexpected error occurred";
+    const response: StandardResponse = {
+      message: errorMessage,
+      code: 500,
+    };
+
+    return NextResponse.json(response);
   }
 }

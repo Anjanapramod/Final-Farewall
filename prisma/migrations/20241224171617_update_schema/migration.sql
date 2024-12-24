@@ -47,6 +47,10 @@ CREATE TABLE "Booking" (
     "status" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" INTEGER NOT NULL,
+    "serviceId" INTEGER,
+    "bookedDate" TIMESTAMP(3),
+    "assertId" INTEGER,
+    "assetQty" INTEGER,
 
     CONSTRAINT "Booking_pkey" PRIMARY KEY ("id")
 );
@@ -62,17 +66,6 @@ CREATE TABLE "Asset" (
     "funeralParlorId" INTEGER NOT NULL,
 
     CONSTRAINT "Asset_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "BookingDetail" (
-    "id" SERIAL NOT NULL,
-    "unit" INTEGER,
-    "bookingId" INTEGER NOT NULL,
-    "serviceId" INTEGER,
-    "assetId" INTEGER,
-
-    CONSTRAINT "BookingDetail_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -101,12 +94,3 @@ ALTER TABLE "Booking" ADD CONSTRAINT "Booking_userId_fkey" FOREIGN KEY ("userId"
 
 -- AddForeignKey
 ALTER TABLE "Asset" ADD CONSTRAINT "Asset_funeralParlorId_fkey" FOREIGN KEY ("funeralParlorId") REFERENCES "FuneralParlor"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "BookingDetail" ADD CONSTRAINT "BookingDetail_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "Booking"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "BookingDetail" ADD CONSTRAINT "BookingDetail_serviceId_fkey" FOREIGN KEY ("serviceId") REFERENCES "Service"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "BookingDetail" ADD CONSTRAINT "BookingDetail_assetId_fkey" FOREIGN KEY ("assetId") REFERENCES "Asset"("id") ON DELETE SET NULL ON UPDATE CASCADE;
