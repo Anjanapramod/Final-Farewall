@@ -7,7 +7,7 @@ import axios from "axios";
 
 enum ACTIONS {
     SAVE = "asset/save",
-    GET = "asset/get",
+    GET_ALL = "asset/get",
     DELETE = "asset/delete",
     FIND_BY_ID = "asset/findById",
     FIND_BY_FUNERAL_PARLOR_ID = "asset/findByFuneralParlorId",
@@ -59,8 +59,8 @@ export const getAssetByFuneralParlorId = createAsyncThunk(
 );
 
 // ASSET GET ALL
-export const getAsset = createAsyncThunk(
-    ACTIONS.GET,
+export const getAllAsset = createAsyncThunk(
+    ACTIONS.GET_ALL,
     async (_, { rejectWithValue }) => {
         try {
             console.log("GET API CALL");
@@ -107,19 +107,30 @@ export const postAsset = createAsyncThunk(
         }
     }
 );
-
 const assetSlice = createSlice({
     name: "asset",
     initialState,
     reducers: {},
     extraReducers: (builder) => {
-        // GET ALL by FUNERAL PARLOR ID 
+        // GET ALL by FUNERAL PARLOR ID
         builder.addCase(getAssetByFuneralParlorId.fulfilled, (state, action) => {
             state.assets = action.payload as Asset[];
             state.error = null;
             state.isSucess = true;
         });
         builder.addCase(getAssetByFuneralParlorId.rejected, (state, action) => {
+            state.error = action.payload as string;
+            state.assets = null;
+            state.isSucess = false;
+        });
+
+        // GET ALL
+        builder.addCase(getAllAsset.fulfilled, (state, action) => {
+            state.assets = action.payload as Asset[];
+            state.error = null;
+            state.isSucess = true;
+        });
+        builder.addCase(getAllAsset.rejected, (state, action) => {
             state.error = action.payload as string;
             state.assets = null;
             state.isSucess = false;
@@ -138,6 +149,7 @@ const assetSlice = createSlice({
         });
     },
 });
+
 
 export default assetSlice.reducer;
 
