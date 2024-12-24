@@ -5,6 +5,7 @@ import {
   deleteService,
   getAllByParlorId,
   saveService,
+  updateService,
 } from "@/app/store/slices/servicesSlice";
 import { AppDispatch, RootState } from "@/app/store/store";
 import { PenIcon, Trash } from "lucide-react";
@@ -14,12 +15,15 @@ import { useDispatch, useSelector } from "react-redux";
 export default function ManageServices() {
   const dispatch: AppDispatch = useDispatch();
   const { services } = useSelector((state: RootState) => state.services);
+  const [isSelected, setIsSelected] = useState(false);
 
   const [formData, setFormData] = useState({
+    id: 0,
     name: "",
     description: "",
-    rate: "",
+    rate: 0,
     availability: false,
+    funeralParlorId: 0,
   });
 
   useEffect(() => {
@@ -64,10 +68,12 @@ export default function ManageServices() {
       });
 
     setFormData({
+      id: 0,
       name: "",
       description: "",
-      rate: "",
+      rate: 0,
       availability: false,
+      funeralParlorId: 0,
     });
   };
 
@@ -92,6 +98,37 @@ export default function ManageServices() {
         console.error("Failed to delete service:", error);
         alert("Error deleting service");
       });
+  };
+  const handleUpdate = () => {
+    const funeralParlor = localStorage.getItem("funeralParlor")
+      ? JSON.parse(localStorage.getItem("funeralParlor") as string)
+      : null;
+
+    dispatch(
+      updateService({
+        ...formData,
+        rate: Number(formData.rate),
+        funeralParlorId: funeralParlor?.id,
+      })
+    )
+      .then(() => {
+        alert("Service updated successfully");
+        setIsSelected(false);
+        refreshTable();
+      })
+      .catch((error: undefined) => {
+        console.error("Failed to update service:", error);
+        alert("Error updating service");
+      });
+
+    setFormData({
+      id: 0,
+      name: "",
+      description: "",
+      rate: 0,
+      availability: false,
+      funeralParlorId: 0,
+    });
   };
 
   return (
@@ -174,12 +211,42 @@ export default function ManageServices() {
               </label>
             </div>
 
-            <button
-              type="submit"
-              className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
-            >
-              Add Service
-            </button>
+            {!isSelected ? (
+              <button
+                type="submit"
+                className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+              >
+                Add Service
+              </button>
+            ) : (
+              <div>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+                  onClick={() => {
+                    handleUpdate();
+                  }}
+                >
+                  Update Service
+                </button>
+                <button
+                  onClick={() => {
+                    setIsSelected(false);
+                    setFormData({
+                      id: 0,
+                      name: "",
+                      description: "",
+                      rate: 0,
+                      availability: false,
+                      funeralParlorId: 0,
+                    });
+                  }}
+                  className="w-full ml-2 sm:w-auto px-4 py-2 mt-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:ring-2 focus:ring-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </form>
         </div>
 
@@ -228,7 +295,22 @@ export default function ManageServices() {
                         >
                           <Trash size={16} />
                         </button>
-                        <button className="text-blue-600 hover:text-blue-900">
+                        <button
+                          onClick={() => {
+                            setIsSelected(true);
+                            setFormData({
+                              id: service.id ? service.id : 0,
+                              name: service.name,
+                              description: service.description,
+                              rate: service.rate,
+                              availability: service.availability,
+                              funeralParlorId: service.funeralParlorId
+                                ? service.funeralParlorId
+                                : 0,
+                            });
+                          }}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
                           <PenIcon size={16} />
                         </button>
                       </td>

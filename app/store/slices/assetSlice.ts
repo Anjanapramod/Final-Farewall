@@ -134,6 +134,31 @@ export const deleteById = createAsyncThunk(
   }
 );
 
+// UPDATE
+export const updateAsset = createAsyncThunk(
+  ACTIONS.UPDATE,
+  async (data: Asset, { rejectWithValue }) => {
+    try {
+      console.log("UPDATE API CALL");
+      const response = await axios.put("/api/site-assets/manage", data);
+      const responseData: StandardResponse = response.data as StandardResponse;
+      console.log(responseData);
+      if (responseData.code === 200) {
+        console.log("UPDATE ASSET SUCCESS");
+        return responseData.data;
+      } else {
+        console.log(responseData);
+        return rejectWithValue(responseData.message);
+      }
+    } catch (error) {
+      console.log(error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const assetSlice = createSlice({
   name: "asset",
   initialState,
@@ -183,6 +208,18 @@ const assetSlice = createSlice({
     });
 
     builder.addCase(deleteById.rejected, (state, action) => {
+      state.error = action.payload as string;
+      state.asset = null;
+      state.isSucess = false;
+    });
+
+    // UPDATE
+    builder.addCase(updateAsset.fulfilled, (state, action) => {
+      state.asset = action.payload as Asset;
+      state.error = null;
+      state.isSucess = true;
+    });
+    builder.addCase(updateAsset.rejected, (state, action) => {
       state.error = action.payload as string;
       state.asset = null;
       state.isSucess = false;

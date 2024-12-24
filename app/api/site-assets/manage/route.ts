@@ -77,10 +77,10 @@ export async function PUT(request: NextRequest) {
 
   try {
     if (!id || !name || !funeralParlorId) {
-      return NextResponse.json(
-        { message: "ID, name, and funeralParlorId are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        message: "ID, name, and funeralParlorId are required",
+        code: 400,
+      });
     }
 
     // Check if asset exists
@@ -89,12 +89,7 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!asset) {
-      return NextResponse.json(
-        { message: "Asset not found" },
-        {
-          status: 404,
-        }
-      );
+      return NextResponse.json({ message: "Asset not found", code: 404 });
     }
 
     // Check if funeral parlor exists
@@ -103,10 +98,10 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!funeralParlor) {
-      return NextResponse.json(
-        { message: "Funeral parlor not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        message: "Funeral parlor not found",
+        code: 404,
+      });
     }
 
     // Update asset
@@ -126,13 +121,14 @@ export async function PUT(request: NextRequest) {
     const response: StandardResponse = {
       message: "Asset updated successfully",
       data: updatedAsset,
+      code: 200,
     };
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error updating asset:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Failed to update asset";
-    return NextResponse.json({ message: errorMessage, status: 500 });
+    return NextResponse.json({ message: errorMessage, code: 500 });
   }
 }
 
