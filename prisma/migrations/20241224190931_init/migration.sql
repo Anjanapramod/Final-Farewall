@@ -42,15 +42,13 @@ CREATE TABLE "Service" (
 -- CreateTable
 CREATE TABLE "Booking" (
     "id" SERIAL NOT NULL,
-    "price" DOUBLE PRECISION,
-    "date" TIMESTAMP(3),
-    "status" TEXT,
+    "price" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" INTEGER NOT NULL,
     "serviceId" INTEGER,
     "bookedDate" TIMESTAMP(3),
-    "assertId" INTEGER,
-    "assetQty" INTEGER,
+    "assertId" INTEGER NOT NULL,
+    "assetQty" INTEGER NOT NULL,
 
     CONSTRAINT "Booking_pkey" PRIMARY KEY ("id")
 );

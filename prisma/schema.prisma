@@ -60,8 +60,8 @@ model Service {
 model Booking {
   id       Int      @id @default(autoincrement())
 
-  price    Float?
-  createdAt DateTime? @default(now())
+  price    Float
+  createdAt DateTime @default(now())
   
   userId   Int
   user    User     @relation(fields: [userId], references: [id])
@@ -69,8 +69,8 @@ model Booking {
   serviceId Int?
   bookedDate DateTime?
 
-  assertId  Int?
-  assetQty Int?
+  assertId  Int
+  assetQty Int
 
 }
 

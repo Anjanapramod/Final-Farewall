@@ -10,14 +10,7 @@ export async function POST(request: NextRequest) {
     const { price, userId, serviceId, assertId, assetQty, bookedDate } =
       await request.json();
 
-    console.log("Request body: ", {
-      price,
-      userId,
-      serviceId,
-      assertId,
-      assetQty,
-      bookedDate,
-    });
+    console.log(price, userId, serviceId, assertId, assetQty, bookedDate);
 
     // Validate required fields
     if (!price || !userId) {
@@ -34,7 +27,6 @@ export async function POST(request: NextRequest) {
       const asset = await prismaClient.asset.findUnique({
         where: { id: assertId },
       });
-
       if (!asset || asset.quantity === null || asset.quantity < assetQty) {
         const response: StandardResponse = {
           message: "Asset not available or insufficient quantity",
@@ -42,22 +34,22 @@ export async function POST(request: NextRequest) {
         };
         return NextResponse.json(response);
       }
-
       // Update asset quantity
       const updatedQty = asset.quantity - assetQty;
       await prismaClient.asset.update({
         where: { id: assertId },
         data: { quantity: updatedQty },
       });
-
       // Save booking with asset details
       await prismaClient.booking.create({
         data: {
-          price,
-          userId,
-          assertId,
-          assetQty,
-
+          price: price,
+          userId: userId,
+          serviceId: 0,
+          bookedDate: new Date(bookedDate),
+          assertId: assertId,
+          assetQty: assetQty,
+          createdAt: new Date(),
         },
       });
     } else {
@@ -69,21 +61,21 @@ export async function POST(request: NextRequest) {
         };
         return NextResponse.json(response);
       }
-      console.log("---------------------------------");
-      // Save booking without asset details
-      const k = {
+
+      console.log("Saving booking...");
+
+      const r = await prismaClient.booking.create({
         data: {
-          price: 100,
-          userId: 1,
-          bookedDate: new Date(),
-          assetQty: 0,
-          serviceId: 1,
-          assertId: 0, // Default `assertId` when not applicable
+          price: price,
+          userId: userId,
+          serviceId: serviceId,
+          bookedDate: new Date(bookedDate),
           createdAt: new Date(),
+          assertId: 0,
+          assetQty: 0,
         },
-      };
-      const r = await prismaClient.booking.create(k);
-      console.log(r)
+      });
+      console.log("--->", r);
     }
 
     // Successful response
