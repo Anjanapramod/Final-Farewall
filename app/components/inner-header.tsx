@@ -38,7 +38,14 @@ export default function InnerHeader() {
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="text-xl font-semibold">
+          <Link
+            href={
+              role === "ADMIN"
+                ? "/dashboard/admin/manage-funeral-parlors"
+                : "/dashboard/user"
+            }
+            className="text-xl font-semibold"
+          >
             Final Farewell
           </Link>
 
