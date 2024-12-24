@@ -1,16 +1,10 @@
 "use client";
 
 import { PenIcon, Trash } from "lucide-react";
-import { useState } from "react";
-
-interface Asset {
-    id: number;
-    name: string;
-    description?: string;
-    rate?: number;
-    quantity?: number;
-    funeralParlorId: number;
-}
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/app/store/store";
+import { getAssetByFuneralParlorId } from "@/app/store/slices/assetSlice";
 
 export default function ManageAssets() {
     const [formData, setFormData] = useState({
@@ -21,43 +15,26 @@ export default function ManageAssets() {
         funeralParlorId: "",
     });
 
-    const [assets, setAssets] = useState<Asset[]>([
-        {
-            id: 1,
-            name: "Casket A",
-            description: "High-quality wooden casket",
-            rate: 500.0,
-            quantity: 10,
-            funeralParlorId: 1,
-        },
-        {
-            id: 2,
-            name: "Flower Arrangement",
-            description: "White lilies and roses",
-            rate: 200.0,
-            quantity: 5,
-            funeralParlorId: 2,
-        },
-    ]);
+    const dispatch: AppDispatch = useDispatch();
+    // const { user } = useSelector((state: RootState) => state.user);
+    const { assets } = useSelector((state: RootState) => state.assets);
+
+
+    //Fetch assets on component mount by funeralParlorId
+    useEffect(() => {
+        // get funeralParlor from local storage
+        const funeralParlor = localStorage.getItem("funeralParlor") ? JSON.parse(localStorage.getItem("funeralParlor") as string) : null;
+        if (funeralParlor?.id) {
+            dispatch(getAssetByFuneralParlorId(funeralParlor.id));
+        }
+    }, [dispatch]);
+
+
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const newAsset: Asset = {
-            id: Date.now(),
-            name: formData.name,
-            description: formData.description || undefined,
-            rate: formData.rate ? parseFloat(formData.rate) : undefined,
-            quantity: formData.quantity ? parseInt(formData.quantity) : undefined,
-            funeralParlorId: parseInt(formData.funeralParlorId),
-        };
-        setAssets([...assets, newAsset]);
-        setFormData({
-            name: "",
-            description: "",
-            rate: "",
-            quantity: "",
-            funeralParlorId: "",
-        });
+
     };
 
     const handleChange = (
@@ -67,9 +44,6 @@ export default function ManageAssets() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleDelete = (id: number) => {
-        setAssets(assets.filter((asset) => asset.id !== id));
-    };
 
     return (
         <div className="container max-w-7xl min-h-fit  p-6 mx-auto">
@@ -203,7 +177,7 @@ export default function ManageAssets() {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {assets.length > 0 ? assets.map((asset) => (
+                                {assets && assets.length > 0 ? assets.map((asset) => (
                                     <tr key={asset.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4">{asset.name}</td>
                                         <td className="px-6 py-4">{asset.description || "-"}</td>
@@ -211,7 +185,6 @@ export default function ManageAssets() {
                                         <td className="px-6 py-4">{asset.quantity || "-"}</td>
                                         <td className="px-6 py-4 text-right">
                                             <button
-                                                onClick={() => handleDelete(asset.id)}
                                                 className="mr-3 text-red-600 hover:text-red-900"
                                             >
                                                 <Trash size={16} />

@@ -29,6 +29,8 @@ export default function Page() {
 
     // Fetch funeral parlor on component mount or when user changes
     useEffect(() => {
+        console.log("Fetching funeral parlor: useEffect()");
+        const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null;
         if (user?.id) {
             dispatch(findFuneralParlorByUserId(user.id));
         }

@@ -35,6 +35,7 @@ export const postLogin = createAsyncThunk(
             const k: StandardResponse = response.data as StandardResponse;
             if (k.code === 200) {
                 console.log(k)
+                localStorage.setItem("user", JSON.stringify(k.data));
                 return k.data;
             } else {
                 return rejectWithValue(k.message);

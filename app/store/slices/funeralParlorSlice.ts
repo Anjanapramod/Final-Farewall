@@ -78,7 +78,6 @@ export const postFuneralParlor = createAsyncThunk(
     }
 );
 
-
 // FIND BY USER ID
 export const findFuneralParlorByUserId = createAsyncThunk(
     ACTIONS.FIND_BY_ID,
@@ -88,8 +87,9 @@ export const findFuneralParlorByUserId = createAsyncThunk(
             const response = await axios.get("/api/funeral-parlors/manage", { params: { userId } });
             const responseData: StandardResponse = response.data as StandardResponse;
             if (responseData.code === 200) {
-                console.log("FIND BY USER ID API CALL SUCCESS: " + userId); 
+                console.log("FIND BY USER ID API CALL SUCCESS: " + userId);
                 console.log(responseData.data);
+                localStorage.setItem("funeralParlor", JSON.stringify(responseData.data)); // store funeral parlor in local storage
                 return responseData.data;
             } else {
                 return rejectWithValue(responseData.message);
@@ -101,7 +101,6 @@ export const findFuneralParlorByUserId = createAsyncThunk(
         }
     }
 );
-
 
 // FIND BY PARLOR ID
 export const findFuneralParlorById = createAsyncThunk(

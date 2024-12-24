@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prismaClient } from "@/app/database/DatabaseClient";
 import { StandardResponse } from "@/app/helpers/types/response.type";
+import { Code } from "lucide-react";
 
 // Create Asset
 export async function POST(request: NextRequest) {
@@ -66,19 +67,37 @@ export async function POST(request: NextRequest) {
 }
 
 // Get All Assets
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const funeralParlorId = searchParams.get("funeralParlorId");
   try {
+
+    if (funeralParlorId) {
+      const assets = await prismaClient.asset.findMany({
+        where: { funeralParlorId: parseInt(funeralParlorId) },
+        include: {
+          funeralParlor: false,
+        },
+      });
+      return NextResponse.json({
+        message: "Assets fetched successfully",
+        data: assets,
+        code: 200,
+      });
+    }
+
+
     const assets = await prismaClient.asset.findMany({
       include: {
         funeralParlor: false,
       },
     });
-
     const response: StandardResponse = {
       message: "Assets fetched successfully",
       data: assets,
+      code: 200
     };
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching assets:", error);
     const errorMessage =
