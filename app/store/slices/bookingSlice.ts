@@ -6,19 +6,19 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 enum ACTIONS {
-  SAVE = "booking/save",
-  GET_ALL = "booking/get",
-  DELETE = "booking/delete",
-  FIND_BY_ID = "booking/findById",
-  FIND_BY_USER_ID = "booking/findByUserId",
-  UPDATE = "booking/update",
+    SAVE = "booking/save",
+    GET_ALL = "booking/get",
+    DELETE = "booking/delete",
+    FIND_BY_ID = "booking/findById",
+    FIND_BY_USER_ID = "booking/findByUserId",
+    UPDATE = "booking/update",
 }
 
 interface BookingState {
-  bookings: Booking[] | null;
-  error: string | null;
-  message: string | null;
-  isSucess: boolean;
+    bookings: Booking[] | null;
+    error: string | null;
+    message: string | null;
+    isSucess: boolean;
 }
 
 
@@ -35,15 +35,41 @@ export const saveBooking = createAsyncThunk(
 
         try {
             console.log("---------------------------------------------------")
-
             console.log("SAVE BOOKING API CALL");
             console.log("---------------------------------------------------")
             console.log(bookingDetail);
-            const response = await axios.post("/api/bookings",{...bookingDetail});
+            const response = await axios.post("/api/bookings", { ...bookingDetail });
             const responseData: StandardResponse = response.data as StandardResponse;
             console.log(responseData.data);
             if (responseData.code === 201) {
                 console.log("Booking Added Successfully");
+                return responseData.data;
+            } else {
+                console.log(responseData);
+                return rejectWithValue(responseData.message);
+            }
+        } catch (error) {
+            console.log(error);
+            const errorMessage =
+                error instanceof Error ? error.message : "An unknown error occurred";
+            return rejectWithValue(errorMessage);
+        }
+    }
+);
+
+export const getAllBookings = createAsyncThunk(
+    ACTIONS.GET_ALL,
+    async (_,{ rejectWithValue }) => {
+        try {
+            console.log("---------------------------------------------------")
+            console.log("GET ALL BOOKING API CALL");
+            console.log("---------------------------------------------------")
+       
+            const response = await axios.get(`/api/bookings`);
+            const responseData: StandardResponse = response.data as StandardResponse;
+            console.log(responseData.data);
+            if (responseData.code === 200) {
+                console.log("Booking Fetched Successfully");
                 return responseData.data;
             } else {
                 console.log(responseData);
@@ -70,6 +96,14 @@ const bookingSlice = createSlice({
         builder.addCase(saveBooking.rejected, (state, action) => {
             state.error = action.payload as string;
             state.isSucess = false;
+        });
+
+        //get all bookings
+        builder.addCase(getAllBookings.fulfilled, (state, action) => {
+            state.bookings = action.payload as Booking[];
+        });
+        builder.addCase(getAllBookings.rejected, (state, action) => {
+            state.error = action.payload as string;
         });
     },
 

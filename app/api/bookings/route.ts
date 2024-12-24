@@ -98,3 +98,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
   }
 }
+
+// filter by user id
+export async function GET() {
+  try {
+    console.log("Fetching bookings...");
+    const bookings = await prismaClient.booking.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    // Successful response
+    const response: StandardResponse = {
+      code: 200,
+      data: bookings,
+      message: "Bookings fetched successfully",
+    };
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error("Error fetching bookings: ", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unexpected error occurred";
+    const response: StandardResponse = {
+      message: errorMessage,
+      code: 500,
+    };
+
+    return NextResponse.json(response);
+  }
+}

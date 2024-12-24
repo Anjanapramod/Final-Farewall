@@ -9,11 +9,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Service } from "../helpers/types/service.types";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
 import { Booking } from "../helpers/types/booking.type";
 import { saveBooking } from "../store/slices/bookingSlice";
+import { Asset } from "../helpers/types/asset.type";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -22,15 +22,16 @@ interface BookingModalProps {
     user: string;
     date: string;
     price: string;
+    quantity: string;
   }) => void;
-  service: Service;
+  asset: Asset;
 }
 
 export function BookingModal({
   isOpen,
   onClose,
   onConfirm,
-  service,
+  asset,
 }: BookingModalProps) {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -47,24 +48,34 @@ export function BookingModal({
       return;
     }
 
+    const quantity = parseInt(formData.get("quantity") as string, 10);
+
+    // Ensure the quantity does not exceed the available stock
+    if (quantity > asset.quantity) {
+      alert("The requested quantity exceeds available stock.");
+      return;
+    }
+
     const bookingData: Booking = {
-      price: parseFloat(formData.get("price") as string),
+      price: parseFloat(formData.get("price") as string) * quantity, // Calculate total price
       userId: user.id,
-      serviceId: service.id,
       bookedDate: new Date(formData.get("date") as string),
-      assertId: 0,
-      assetQty: 0,
+      assertId: asset.id, // Use correct assetId
+      assetQty: quantity,
     };
 
     // Dispatch the booking action
     console.log("Booking Data: ", bookingData);
-    dispatch(saveBooking(bookingData));
+    dispatch(saveBooking(bookingData)).then(() => {
+        
+    })
 
     // Callback for further actions
     onConfirm({
       user: user.name,
       date: formData.get("date") as string,
       price: formData.get("price") as string,
+      quantity: formData.get("quantity") as string,
     });
 
     onClose();
@@ -74,7 +85,7 @@ export function BookingModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Book {service?.name}</DialogTitle>
+          <DialogTitle>Purchase {asset?.name}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           {/* User Section */}
@@ -91,10 +102,22 @@ export function BookingModal({
             <Label htmlFor="date">Date</Label>
             <Input id="date" name="date" type="datetime-local" required />
           </div>
+          {/* Quantity Section */}
+          <div className="grid gap-2">
+            <Label htmlFor="quantity">Quantity</Label>
+            <Input
+              id="quantity"
+              name="quantity"
+              type="number"
+              min={1}
+              max={asset.quantity}
+              required
+            />
+          </div>
           {/* Price Section */}
           <div className="grid gap-2">
             <Label htmlFor="price">Price</Label>
-            <Input id="price" name="price" value={service.rate} readOnly />
+            <Input id="price" name="price" value={asset.rate} readOnly />
           </div>
           {/* Buttons */}
           <div className="flex justify-end gap-4">

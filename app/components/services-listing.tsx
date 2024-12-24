@@ -90,6 +90,8 @@ export default function ServicesListing() {
           onClose={handleCloseModal}
           onConfirm={(bookingData) => {
             console.log("Booking confirmed:", bookingData);
+            alert("Booking confirmed!");
+            dispatch(getAllByParlorId(Number(params.id)));
             handleCloseModal();
           }}
           service={selectedService}
