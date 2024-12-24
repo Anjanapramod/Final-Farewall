@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prismaClient } from "@/app/database/DatabaseClient";
 import { StandardResponse } from "@/app/helpers/types/response.type";
-import { Code } from "lucide-react";
 
 // Create Asset
 export async function POST(request: NextRequest) {
@@ -12,12 +11,10 @@ export async function POST(request: NextRequest) {
       await request.json();
 
     if (!name || !funeralParlorId) {
-      return NextResponse.json(
-        {
-          message: "Name and funeralParlorId are required",
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        message: "Name and funeralParlorId are required",
+        code: 400,
+      });
     }
 
     const funeralParlor = await prismaClient.funeralParlor.findUnique({
@@ -25,10 +22,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!funeralParlor) {
-      return NextResponse.json(
-        { message: "Funeral parlor not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        message: "Funeral parlor not found",
+        code: 404,
+      });
     }
 
     const existingAsset = await prismaClient.asset.findUnique({
@@ -36,10 +33,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingAsset) {
-      return NextResponse.json(
-        { message: "Asset with this name already exists" },
-        { status: 409 }
-      );
+      return NextResponse.json({
+        message: "Asset with this name already exists",
+        code: 409,
+      });
     }
 
     // Create new asset
@@ -56,13 +53,14 @@ export async function POST(request: NextRequest) {
     const response: StandardResponse = {
       message: "Asset created successfully",
       data: asset,
+      code: 201,
     };
-    return NextResponse.json(response, { status: 201 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error creating asset:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Failed to create asset";
-    return NextResponse.json({ message: errorMessage, status: 500 });
+    return NextResponse.json({ message: errorMessage, code: 500 });
   }
 }
 
@@ -71,7 +69,6 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const funeralParlorId = searchParams.get("funeralParlorId");
   try {
-
     if (funeralParlorId) {
       const assets = await prismaClient.asset.findMany({
         where: { funeralParlorId: parseInt(funeralParlorId) },
@@ -86,7 +83,6 @@ export async function GET(req: Request) {
       });
     }
 
-
     const assets = await prismaClient.asset.findMany({
       include: {
         funeralParlor: false,
@@ -95,13 +91,13 @@ export async function GET(req: Request) {
     const response: StandardResponse = {
       message: "Assets fetched successfully",
       data: assets,
-      code: 200
+      code: 200,
     };
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching assets:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Failed to fetch assets";
-    return NextResponse.json({ message: errorMessage, status: 500 });
+    return NextResponse.json({ message: errorMessage, code: 500 });
   }
 }

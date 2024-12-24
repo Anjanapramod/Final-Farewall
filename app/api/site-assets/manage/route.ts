@@ -13,14 +13,15 @@ async function getAssetById(id: string) {
     });
 
     if (!asset) {
-      return NextResponse.json({ message: "Asset not found" }, { status: 404 });
+      return NextResponse.json({ message: "Asset not found", code: 404 });
     }
 
     const response: StandardResponse = {
       message: "Asset found",
       data: asset,
+      code: 200,
     };
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching asset:", error);
     const errorMessage =
@@ -142,10 +143,10 @@ export async function DELETE(req: Request) {
 
   try {
     if (!id || isNaN(Number(id))) {
-      return NextResponse.json(
-        { message: "Invalid or missing asset ID", status: 400 },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        message: "Invalid or missing asset ID",
+        code: 400,
+      });
     }
 
     const asset = await prismaClient.asset.findUnique({
@@ -153,10 +154,7 @@ export async function DELETE(req: Request) {
     });
 
     if (!asset) {
-      return NextResponse.json(
-        { message: "Asset not found", status: 404 },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Asset not found", code: 404 });
     }
 
     await prismaClient.asset.delete({
@@ -165,8 +163,9 @@ export async function DELETE(req: Request) {
 
     const response: StandardResponse = {
       message: "Asset deleted successfully",
+      code: 200,
     };
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error deleting asset:", error);
     const errorMessage =

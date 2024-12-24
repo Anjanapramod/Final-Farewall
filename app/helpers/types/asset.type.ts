@@ -1,12 +1,12 @@
 export interface Asset {
-    id?: number;
+  id?: number;
 
-    name: string;
-    description: string;
+  name: string;
+  description: string;
 
-    rate: number;
-    quantity: number;
-    createdAt?: Date;
+  rate: number;
+  quantity: number;
+  createdAt?: Date;
 
-    funeralParlorId: number;
+  funeralParlorId?: number;
 }
