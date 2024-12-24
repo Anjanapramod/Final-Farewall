@@ -1,12 +1,13 @@
 "use client";
-import React from 'react'
+import FuneralParlorListing from "@/app/components/funeral-parlor-listing";
+import React from "react";
 
 const page = () => {
   return (
-    <div>
-        user dashboard page      
+    <div className="container mx-auto px-4 py-12 h-screen">
+      <FuneralParlorListing />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

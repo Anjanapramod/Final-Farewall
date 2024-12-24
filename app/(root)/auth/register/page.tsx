@@ -57,7 +57,7 @@ const Page = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "USER",
+      role: "ADMIN",
     });
   };
 
