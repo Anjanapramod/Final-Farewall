@@ -5,7 +5,6 @@ import { StandardResponse } from "@/app/helpers/types/response.type";
 export async function POST(request: NextRequest) {
   try {
     console.log("Saving booking...");
-
     // Parse request body
     const {
       price,
@@ -18,18 +17,6 @@ export async function POST(request: NextRequest) {
       status,
       parlorId,
     } = await request.json();
-    const b = {
-      price,
-      userId,
-      serviceId,
-      assertId,
-      assetQty,
-      bookedDate,
-      name,
-      status,
-      parlorId,
-    };
-    console.log(b);
 
     // Validate required fields
     if (!price || !userId) {
@@ -60,7 +47,7 @@ export async function POST(request: NextRequest) {
         data: { quantity: updatedQty },
       });
       // Save booking with asset details
-      const r = await prismaClient.booking.create({
+      const savedBooking = await prismaClient.booking.create({
         data: {
           price: price,
           userId: userId,
@@ -75,9 +62,9 @@ export async function POST(request: NextRequest) {
           parlorId: parlorId,
         },
       });
-      console.log("--->", r);
+      console.log("Saved booking data :", savedBooking);
     } else {
-      // Validate `serviceId` when not using assets
+
       if (!serviceId) {
         const response: StandardResponse = {
           message: "Missing required field: serviceId",
@@ -86,9 +73,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(response);
       }
 
-      console.log("Saving booking...");
-
-      const r = await prismaClient.booking.create({
+      // Save booking with service details
+      const savedBooking = await prismaClient.booking.create({
         data: {
           price: price,
           userId: userId,
@@ -103,10 +89,9 @@ export async function POST(request: NextRequest) {
           parlorId: parlorId,
         },
       });
-      console.log("--->", r);
+      console.log("Saved booking data :", savedBooking);
     }
 
-    // Successful response
     const response: StandardResponse = {
       code: 201,
       message: "Booking saved successfully!",
@@ -155,8 +140,10 @@ export async function GET(request: Request) {
     if (parlorId) {
       // Fetch bookings by user ID
       console.log("Fetching bookings by parlor ID...");
+
       const bookings = await prismaClient.booking.findMany({
         where: { parlorId: parseInt(parlorId, 10) },
+        include: { user: { select: { name: true, id: true } } },
       });
       const response: StandardResponse = {
         code: 200,

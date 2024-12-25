@@ -11,6 +11,7 @@ enum ACTIONS {
     DELETE = "booking/delete",
     FIND_BY_ID = "booking/findById",
     FIND_BY_USER_ID = "booking/findByUserId",
+    FIND_BY_PARLOR_ID = "booking/findByParlorId",
     UPDATE = "booking/update",
 }
 
@@ -59,13 +60,73 @@ export const saveBooking = createAsyncThunk(
 
 export const getAllBookings = createAsyncThunk(
     ACTIONS.GET_ALL,
-    async (_,{ rejectWithValue }) => {
+    async (_, { rejectWithValue }) => {
         try {
             console.log("---------------------------------------------------")
             console.log("GET ALL BOOKING API CALL");
             console.log("---------------------------------------------------")
-       
+
             const response = await axios.get(`/api/bookings`);
+            const responseData: StandardResponse = response.data as StandardResponse;
+            console.log(responseData.data);
+            if (responseData.code === 200) {
+                console.log("Booking Fetched Successfully");
+                return responseData.data;
+            } else {
+                console.log(responseData);
+                return rejectWithValue(responseData.message);
+            }
+        } catch (error) {
+            console.log(error);
+            const errorMessage =
+                error instanceof Error ? error.message : "An unknown error occurred";
+            return rejectWithValue(errorMessage);
+        }
+    }
+);
+
+export const getAllBookingsByUserId = createAsyncThunk(
+    ACTIONS.FIND_BY_USER_ID,
+    async (userId: number, { rejectWithValue }) => {
+        try {
+            console.log("---------------------------------------------------")
+            console.log("GET ALL BOOKING BY USER ID API CALL");
+            console.log("---------------------------------------------------")
+            const response = await axios.get(`/api/bookings`, {
+                params: {
+                    userId,
+                },
+            });
+            const responseData: StandardResponse = response.data as StandardResponse;
+            console.log(responseData.data);
+            if (responseData.code === 200) {
+                console.log("Booking Fetched Successfully");
+                return responseData.data;
+            } else {
+                console.log(responseData);
+                return rejectWithValue(responseData.message);
+            }
+        } catch (error) {
+            console.log(error);
+            const errorMessage =
+                error instanceof Error ? error.message : "An unknown error occurred";
+            return rejectWithValue(errorMessage);
+        }
+    }
+);
+
+export const getAllBookingsByParlorId = createAsyncThunk(
+    ACTIONS.FIND_BY_PARLOR_ID,
+    async (parlorId: number, { rejectWithValue }) => {
+        try {
+            console.log("---------------------------------------------------")
+            console.log("GET ALL BOOKING BY PARLOR ID API CALL");
+            console.log("---------------------------------------------------")
+            const response = await axios.get(`/api/bookings`, {
+                params: {
+                    parlorId,
+                },
+            });
             const responseData: StandardResponse = response.data as StandardResponse;
             console.log(responseData.data);
             if (responseData.code === 200) {
@@ -103,6 +164,22 @@ const bookingSlice = createSlice({
             state.bookings = action.payload as Booking[];
         });
         builder.addCase(getAllBookings.rejected, (state, action) => {
+            state.error = action.payload as string;
+        });
+
+        //get all bookings by user id
+        builder.addCase(getAllBookingsByUserId.fulfilled, (state, action) => {
+            state.bookings = action.payload as Booking[];
+        });
+        builder.addCase(getAllBookingsByUserId.rejected, (state, action) => {
+            state.error = action.payload as string;
+        });
+
+        //get all bookings by parlor id
+        builder.addCase(getAllBookingsByParlorId.fulfilled, (state, action) => {
+            state.bookings = action.payload as Booking[];
+        });
+        builder.addCase(getAllBookingsByParlorId.rejected, (state, action) => {
             state.error = action.payload as string;
         });
     },

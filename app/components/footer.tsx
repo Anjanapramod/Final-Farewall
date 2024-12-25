@@ -4,8 +4,8 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-100 py-8">
-      <div className="container mx-auto px-4">
+    <footer className="bg-gray-100 py-8 ">
+      <div className="container mx-auto px-4 max-w-7xl">
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-lg font-semibold mb-4">Final Farewell</h3>

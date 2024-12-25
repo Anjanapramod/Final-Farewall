@@ -71,10 +71,11 @@ export default function ServicesListing() {
                   <Button
                     onClick={() => handleOpenServiceModal(service)}
                     disabled={!service.availability}
-                    className={`${!service.availability
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                      }`}
+                    className={`${
+                      !service.availability
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
                     {service.availability ? "Book Now" : "Unavailable"}
                   </Button>
@@ -93,17 +94,19 @@ export default function ServicesListing() {
             console.log("Booking confirmed:", bookingData);
             alert("Booking confirmed!");
 
-            dispatch(saveBooking({ ...bookingData, price: Number(bookingData.price), date: new Date(bookingData.date) })).then(() => {
+            dispatch(
+              saveBooking({
+                ...bookingData,
+                price: Number(bookingData.price),
+                date: new Date(bookingData.date),
+                user: null,
+              })
+            ).then(() => {
               dispatch(getAllByParlorId(Number(params.id)));
-            })
-
-
-
-
+            });
 
             handleCloseModal();
           }}
-
         />
       )}
     </section>

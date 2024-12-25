@@ -1,5 +1,5 @@
 export interface Booking {
-  id?: number;  
+  id?: number;
   price?: number;
   date?: Date;
   status?: string; // PENDING, CONFIRMED, CANCELLED
@@ -8,11 +8,17 @@ export interface Booking {
   serviceId?: number;
   bookedDate?: Date;
   assertId?: number;
-  assetQty?: number; 
+  assetQty?: number;
 
   type?: string; // SERVICE, ASSET
   name?: string;
 
   parlorId?: number;
-  
+  user?: User | null;
+
+}
+
+interface User {
+  id: number;
+  name: string;
 }

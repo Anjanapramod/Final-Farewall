@@ -18,6 +18,8 @@ import { AppDispatch, RootState } from "../store/store";
 import { getAssetByFuneralParlorId } from "../store/slices/assetSlice";
 import { BookingModal } from "./asset-booking-model";
 import { Asset } from "../helpers/types/asset.type";
+import { saveBooking } from "../store/slices/bookingSlice";
+import { getAllByParlorId } from "../store/slices/servicesSlice";
 
 export default function AssetsListing() {
   const params = useParams();
@@ -93,8 +95,16 @@ export default function AssetsListing() {
           onConfirm={(bookingData) => {
             console.log("Booking confirmed:", bookingData);
             alert("Booking confirmed!");
-            dispatch(getAssetByFuneralParlorId(Number(params.id)));
-            handleCloseModal();
+            dispatch(
+              saveBooking({
+                ...bookingData,
+                price: Number(bookingData.price),
+                date: new Date(bookingData.date),
+                user: null,
+              })
+            ).then(() => {
+              dispatch(getAllByParlorId(Number(params.id)));
+            });
           }}
           asset={selectedAsset}
         />
