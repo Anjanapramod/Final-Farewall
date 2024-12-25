@@ -18,6 +18,7 @@ import { AppDispatch, RootState } from "../store/store";
 import { getAllByParlorId } from "../store/slices/servicesSlice";
 import { Service } from "../helpers/types/service.types";
 import { BookingModal } from "../components/service-booking-model";
+import { saveBooking } from "../store/slices/bookingSlice";
 
 export default function ServicesListing() {
   const params = useParams();
@@ -70,11 +71,10 @@ export default function ServicesListing() {
                   <Button
                     onClick={() => handleOpenServiceModal(service)}
                     disabled={!service.availability}
-                    className={`${
-                      !service.availability
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
+                    className={`${!service.availability
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                      }`}
                   >
                     {service.availability ? "Book Now" : "Unavailable"}
                   </Button>
@@ -86,15 +86,24 @@ export default function ServicesListing() {
 
       {selectedService && (
         <BookingModal
+          service={selectedService}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           onConfirm={(bookingData) => {
             console.log("Booking confirmed:", bookingData);
             alert("Booking confirmed!");
-            dispatch(getAllByParlorId(Number(params.id)));
+
+            dispatch(saveBooking({ ...bookingData, price: Number(bookingData.price), date: new Date(bookingData.date) })).then(() => {
+              dispatch(getAllByParlorId(Number(params.id)));
+            })
+
+
+
+
+
             handleCloseModal();
           }}
-          service={selectedService}
+
         />
       )}
     </section>

@@ -41,6 +41,7 @@ model FuneralParlor {
 
   services Service[]
   assets   Asset[]
+
 }
 
 model Service {
@@ -72,6 +73,22 @@ model Booking {
   assertId  Int
   assetQty Int
 
+  status   BookingStatus @default(PENDING)
+  type     bookingType
+  name    String
+
+  parlorId Int
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum bookingType {
+  SERVICE
+  ASSET
 }
 
 model Asset {

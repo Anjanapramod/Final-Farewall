@@ -32,6 +32,7 @@ export function BookingModal({
   onClose,
   onConfirm,
   asset,
+
 }: BookingModalProps) {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -67,7 +68,7 @@ export function BookingModal({
     // Dispatch the booking action
     console.log("Booking Data: ", bookingData);
     dispatch(saveBooking(bookingData)).then(() => {
-        
+
     })
 
     // Callback for further actions
