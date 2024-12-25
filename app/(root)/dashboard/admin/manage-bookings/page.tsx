@@ -15,10 +15,10 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -29,69 +29,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-// This would typically come from an API or database
-const bookings = [
-  {
-    id: 1,
-    date: "2023-06-01",
-    clientName: "John Doe",
-    type: "service",
-    name: "Basic Funeral Service",
-    quantity: null,
-    rate: "$2,500",
-    status: "Confirmed",
-  },
-  {
-    id: 2,
-    date: "2023-06-05",
-    clientName: "Jane Smith",
-    type: "asset",
-    name: "Standard Casket",
-    quantity: 1,
-    rate: "$1,000",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    date: "2023-06-10",
-    clientName: "Bob Johnson",
-    type: "service",
-    name: "Memorial Service",
-    quantity: null,
-    rate: "$3,000",
-    status: "Confirmed",
-  },
-  {
-    id: 4,
-    date: "2023-06-15",
-    clientName: "Alice Brown",
-    type: "asset",
-    name: "Urn",
-    quantity: 2,
-    rate: "$400",
-    status: "Confirmed",
-  },
-  {
-    id: 5,
-    date: "2023-06-20",
-    clientName: "Charlie Davis",
-    type: "service",
-    name: "Cremation Service",
-    quantity: null,
-    rate: "$1,800",
-    status: "Cancelled",
-  },
-];
+import { useEffect, useState } from "react";
+import { getAllBookingsByParlorId } from "@/app/store/slices/bookingSlice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/app/store/store";
+import { Booking } from "@/app/helpers/types/booking.type";
 
 export default function Page() {
+  const dispatch = useDispatch<AppDispatch>();
+  const [bookings, setBookings] = useState<Booking[]>([]);
+
+  useEffect(() => {
+    const funeralParlor = localStorage.getItem("funeralParlor")
+      ? JSON.parse(localStorage.getItem("funeralParlor") as string)
+      : null;
+
+    if (funeralParlor) {
+      dispatch(getAllBookingsByParlorId(funeralParlor.id)).then((data) => {
+        const bookingsData = data.payload as Booking[];
+        setBookings(bookingsData);
+      });
+    }
+  }, [dispatch]);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Confirmed":
+      case "CONFIRMED":
         return <Badge className="bg-green-500">Confirmed</Badge>;
-      case "Pending":
+      case "PENDING":
         return <Badge className="bg-yellow-500">Pending</Badge>;
-      case "Cancelled":
+      case "CANCELLED":
         return <Badge className="bg-red-500">Cancelled</Badge>;
       default:
         return <Badge>{status}</Badge>;
@@ -99,21 +66,23 @@ export default function Page() {
   };
 
   const handleStatusChange = (bookingId: number, newStatus: string) => {
-    // In a real application, this would update the status in the backend
     console.log(`Updating booking ${bookingId} status to ${newStatus}`);
+    // Add API call or dispatch action to update the status
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <h2 className="text-3xl font-bold mb-6">Funeral Home Bookings</h2>
-      <Table>
+      <Table className="w-full shadow-md  border-gray-200 rounded">
         <TableCaption>
           A list of recent bookings for your funeral home.
         </TableCaption>
-        <TableHeader>
+        <TableHeader className="bg-gray-50 rounded ">
           <TableRow>
             <TableHead>Date</TableHead>
-            <TableHead>Client</TableHead>
+
+            <TableHead>Client ID </TableHead>
+            <TableHead>Client Name</TableHead>
             <TableHead>Service/Asset</TableHead>
             <TableHead>Quantity</TableHead>
             <TableHead>Rate</TableHead>
@@ -122,113 +91,116 @@ export default function Page() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {bookings.map((booking) => (
-            <TableRow key={booking.id}>
-              <TableCell>{booking.date}</TableCell>
-              <TableCell>{booking.clientName}</TableCell>
-              <TableCell>{booking.name}</TableCell>
-              <TableCell>{booking.quantity || "-"}</TableCell>
-              <TableCell>{booking.rate}</TableCell>
-              <TableCell>{getStatusBadge(booking.status)}</TableCell>
-              <TableCell>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      Manage Booking
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Manage Booking</DialogTitle>
-                      <DialogDescription>
-                        View and update details for this booking.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="date" className="text-right">
-                          Date
-                        </Label>
-                        <Input
-                          id="date"
-                          value={booking.date}
-                          className="col-span-3"
-                          readOnly
-                        />
+          {bookings ? (
+            bookings.map((booking) => (
+              <TableRow key={booking.id} className="hover:bg-gray-50">
+                <TableCell>
+                  {booking.bookedDate &&
+                    new Date(booking.bookedDate).toLocaleDateString()}
+                </TableCell>
+                <TableCell >
+                  <span className="text-gray-500 text-sm rounded-full px-2 py-1 bg-gray-100 ml-2">
+                    {booking.user?.id}
+                  </span>
+                </TableCell>
+                <TableCell>{booking.user?.name}</TableCell>
+                <TableCell>{booking.name}</TableCell>
+                <TableCell>
+                  {booking.type === "SERVICE" ? "-" : booking.assetQty}
+                </TableCell>
+                <TableCell>{booking.price}</TableCell>
+                <TableCell>
+                  {getStatusBadge(booking.status || "PENDING")}
+                </TableCell>
+                <TableCell>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        Manage Booking
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Manage Booking</DialogTitle>
+                        <DialogDescription>
+                          View and update details for this booking.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4 ">
+                        {[
+                          { label: "Date", value: booking.bookedDate },
+                          { label: "Client", value: booking.userId },
+                          { label: "Service/Asset", value: booking.name },
+                          {
+                            label: "Quantity",
+                            value:
+                              booking.type === "ASSET" ? booking.assetQty : "-",
+                          },
+                          { label: "Rate", value: booking.price },
+                        ].map((field, index) => (
+                          <div
+                            key={index}
+                            className="grid grid-cols-4 items-center gap-4"
+                          >
+                            <Label
+                              htmlFor={field.label.toLowerCase()}
+                              className="text-right"
+                            >
+                              {field.label}
+                            </Label>
+                            <Input
+                              id={field.label.toLowerCase()}
+                              value={
+                                field.value instanceof Date
+                                  ? field.value.toLocaleDateString()
+                                  : field.value ?? ""
+                              }
+                              className="col-span-3"
+                              readOnly
+                            />
+                          </div>
+                        ))}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="status" className="text-right">
+                            Status
+                          </Label>
+                          <Select
+                            onValueChange={(value: string) =>
+                              handleStatusChange(
+                                booking.id ? booking.id : 0,
+                                value
+                              )
+                            }
+                            defaultValue={booking.status}
+                          >
+                            <SelectTrigger className="col-span-3">
+                              <SelectValue placeholder="Select a status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["CONFIRMED", "PENDING", "CANCELLED"].map(
+                                (status) => (
+                                  <SelectItem key={status} value={status}>
+                                    {status}
+                                  </SelectItem>
+                                )
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="client" className="text-right">
-                          Client
-                        </Label>
-                        <Input
-                          id="client"
-                          value={booking.clientName}
-                          className="col-span-3"
-                          readOnly
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="service" className="text-right">
-                          Service/Asset
-                        </Label>
-                        <Input
-                          id="service"
-                          value={booking.name}
-                          className="col-span-3"
-                          readOnly
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="quantity" className="text-right">
-                          Quantity
-                        </Label>
-                        <Input
-                          id="quantity"
-                          value={booking.quantity || "-"}
-                          className="col-span-3"
-                          readOnly
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="rate" className="text-right">
-                          Rate
-                        </Label>
-                        <Input
-                          id="rate"
-                          value={booking.rate}
-                          className="col-span-3"
-                          readOnly
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="status" className="text-right">
-                          Status
-                        </Label>
-                        <Select
-                          onValueChange={(value: string) =>
-                            handleStatusChange(booking.id, value)
-                          }
-                          defaultValue={booking.status}
-                        >
-                          <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Select a status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Confirmed">Confirmed</SelectItem>
-                            <SelectItem value="Pending">Pending</SelectItem>
-                            <SelectItem value="Cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button type="submit">Save changes</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </TableCell>
+                      <DialogFooter>
+                        <Button type="submit">Save changes</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={7}>No bookings found.</TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>

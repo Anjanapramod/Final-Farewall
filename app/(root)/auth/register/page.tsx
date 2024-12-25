@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/app/store/store";
 import { postRegister } from "@/app/store/slices/userSlice";
 import { UserRegistrationRequestType } from "@/app/helpers/types/request/userRegistrationRequest.type";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { user, error } = useSelector((state: RootState) => state.user);
+  const router = useRouter();
+  const { user } = useSelector((state: RootState) => state.user);
 
   const [formData, setFormData] = useState<UserRegistrationRequestType>({
     name: "",
@@ -19,27 +21,21 @@ const Page = () => {
     role: "USER",
   });
 
-  const [formStatus, setFormStatus] = useState<string>("");
-
-  useEffect(() => {
-    if (error) {
-      setFormStatus(`Error: ${error}`);
-      alert(error);
-    } else if (user) {
-      setFormStatus("Registration successful!");
-      // Clear form after successful registration
-      clearFormData();
-    }
-  }, [error, user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      setFormStatus("Passwords do not match.");
+      alert("Passwords do not match.");
       return;
     }
 
-    dispatch(postRegister(formData));
+    dispatch(postRegister(formData)).then(() => {
+      clearFormData();
+      if (user) {
+        alert("Registration successful. Please login.")
+        router.push("/auth/login");
+      }
+    })
   };
 
   const handleChange = (
@@ -174,18 +170,7 @@ const Page = () => {
           </Link>
         </p>
 
-        {/* Feedback Messages */}
-        {formStatus && (
-          <div className="text-center text-sm text-gray-600 mt-4">
-            <p
-              className={
-                formStatus.includes("Error") ? "text-red-500" : "text-green-500"
-              }
-            >
-              {formStatus}
-            </p>
-          </div>
-        )}
+
       </div>
     </div>
   );

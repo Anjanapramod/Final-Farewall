@@ -22,6 +22,9 @@ interface BookingModalProps {
     user: string;
     date: string;
     price: string;
+    name: string;
+    parlorId: number;
+    type?: string;
   }) => void;
   service: Service;
 }
@@ -54,6 +57,10 @@ export function BookingModal({
       bookedDate: new Date(formData.get("date") as string),
       assertId: 0,
       assetQty: 0,
+      status: "PENDING",
+      type: "SERVICE",
+      name: service.name,
+      parlorId: service.funeralParlorId ? service.funeralParlorId : 0,
     };
 
     // Dispatch the booking action
@@ -65,6 +72,9 @@ export function BookingModal({
       user: user.name,
       date: formData.get("date") as string,
       price: formData.get("price") as string,
+      name: service.name,
+      type: "SERVICE",
+      parlorId: service.funeralParlorId ? service.funeralParlorId : 0,
     });
 
     onClose();

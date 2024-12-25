@@ -1,6 +1,12 @@
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER');
 
+-- CreateEnum
+CREATE TYPE "BookingStatus" AS ENUM ('PENDING', 'CONFIRMED', 'CANCELLED');
+
+-- CreateEnum
+CREATE TYPE "bookingType" AS ENUM ('SERVICE', 'ASSET');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
@@ -49,6 +55,10 @@ CREATE TABLE "Booking" (
     "bookedDate" TIMESTAMP(3),
     "assertId" INTEGER NOT NULL,
     "assetQty" INTEGER NOT NULL,
+    "status" "BookingStatus" NOT NULL DEFAULT 'PENDING',
+    "type" "bookingType" NOT NULL,
+    "name" TEXT NOT NULL,
+    "parlorId" INTEGER NOT NULL,
 
     CONSTRAINT "Booking_pkey" PRIMARY KEY ("id")
 );

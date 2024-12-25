@@ -19,75 +19,65 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../store/store";
 
-// This would typically come from an API or database
-const bookings = [
-  {
-    id: 1,
-    date: "2023-06-01",
-    type: "service",
-    name: "Basic Funeral Service",
-    quantity: null,
-    rate: "$2,500",
-    status: "Confirmed",
-  },
-  {
-    id: 2,
-    date: "2023-06-05",
-    type: "asset",
-    name: "Standard Casket",
-    quantity: 1,
-    rate: "$1,000",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    date: "2023-06-10",
-    type: "service",
-    name: "Memorial Service",
-    quantity: null,
-    rate: "$3,000",
-    status: "Confirmed",
-  },
-  {
-    id: 4,
-    date: "2023-06-15",
-    type: "asset",
-    name: "Urn",
-    quantity: 2,
-    rate: "$400",
-    status: "Confirmed",
-  },
-  {
-    id: 5,
-    date: "2023-06-20",
-    type: "service",
-    name: "Cremation Service",
-    quantity: null,
-    rate: "$1,800",
-    status: "Cancelled",
-  },
-];
+import { getAllBookingsByUserId } from "../store/slices/bookingSlice";
+import { Booking } from "../helpers/types/booking.type";
 
 export default function BookingList() {
-  // const [selectedBooking, setSelectedBooking] = useState(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const [bookings, setBookings] = useState<Booking[]>([]);
+
+  useEffect(() => {
+    const user = localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user") as string)
+      : null;
+    dispatch(getAllBookingsByUserId(user.id)).then((data) => {
+      const b = data.payload as Booking[];
+      setBookings(b);
+    });
+  }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Confirmed":
+      case "CONFIRMED":
         return <Badge className="bg-green-500">Confirmed</Badge>;
-      case "Pending":
+      case "PENDING":
         return <Badge className="bg-yellow-500">Pending</Badge>;
-      case "Cancelled":
+      case "CANCELLED":
         return <Badge className="bg-red-500">Cancelled</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
   };
 
+  //ASSET,SERVICE
+  const getTypeBatch = (type: string) => {
+    switch (type) {
+      case "ASSET":
+        return <Badge className="bg-blue-500">Asset</Badge>;
+      case "SERVICE":
+        return <Badge className="bg-cyan-400">Service</Badge>;
+      default:
+        return <Badge>{type}</Badge>;
+    }
+  };
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold mb-6">Your Bookings</h2>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className=" mx-auto px-4 py-8 mb-6">
+        <h2 className="text-3xl font-bold mb-1">Your Bookings</h2>
+        {bookings.length === 0 && (
+          <div className="flex items-center">
+            <p className="text-gray-400">
+              No bookings found. Please book a service or asset to view your
+              bookings.
+            </p>
+          </div>
+        )}
+      </div>
+
       <Table>
         <TableCaption>A list of your recent bookings.</TableCaption>
         <TableHeader>
@@ -95,19 +85,28 @@ export default function BookingList() {
             <TableHead>Date</TableHead>
             <TableHead>Service/Asset</TableHead>
             <TableHead>Quantity</TableHead>
-            <TableHead>Rate</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {bookings.map((booking) => (
-            <TableRow key={booking.id}>
-              <TableCell>{booking.date}</TableCell>
+            <TableRow key={booking.id} className="hover:bg-gray-100">
+              <TableCell>
+                {booking.bookedDate &&
+                  new Date(booking.bookedDate).toLocaleDateString()}
+              </TableCell>
               <TableCell>{booking.name}</TableCell>
-              <TableCell>{booking.quantity || "-"}</TableCell>
-              <TableCell>{booking.rate}</TableCell>
-              <TableCell>{getStatusBadge(booking.status)}</TableCell>
+              <TableCell>
+                {booking.type === "SERVICE" ? "-" : booking.assetQty}
+              </TableCell>
+              <TableCell>
+                {getTypeBatch(booking.type ? booking.type : "SERVICE")}
+              </TableCell>
+              <TableCell>
+                {getStatusBadge(booking.status ? booking.status : "PENDING")}
+              </TableCell>
               <TableCell>
                 <Dialog>
                   <DialogTrigger asChild>
@@ -122,26 +121,37 @@ export default function BookingList() {
                         Details for your {booking.type} booking.
                       </DialogDescription>
                     </DialogHeader>
+
+                    {/* //make this correct */}
                     <div className="grid gap-4 py-4">
                       <div className="grid grid-cols-2 items-center gap-4">
                         <span className="font-bold">Date:</span>
-                        <span>{booking.date}</span>
+                        <span>
+                          {booking.bookedDate &&
+                            new Date(booking.bookedDate).toLocaleDateString()}
+                        </span>
                       </div>
                       <div className="grid grid-cols-2 items-center gap-4">
                         <span className="font-bold">Service/Asset:</span>
                         <span>{booking.name}</span>
                       </div>
-                      <div className="grid grid-cols-2 items-center gap-4">
-                        <span className="font-bold">Quantity:</span>
-                        <span>{booking.quantity || "-"}</span>
-                      </div>
+                      {booking.type === "ASSET" && (
+                        <div className="grid grid-cols-2 items-center gap-4">
+                          <span className="font-bold">Quantity:</span>
+                          <span>{booking.assetQty}</span>
+                        </div>
+                      )}
                       <div className="grid grid-cols-2 items-center gap-4">
                         <span className="font-bold">Rate:</span>
-                        <span>{booking.rate}</span>
+                        <span>{booking.price}</span>
                       </div>
                       <div className="grid grid-cols-2 items-center gap-4">
                         <span className="font-bold">Status:</span>
-                        <span>{getStatusBadge(booking.status)}</span>
+                        <span>
+                          {getStatusBadge(
+                            booking.status ? booking.status : "PENDING"
+                          )}
+                        </span>
                       </div>
                     </div>
                   </DialogContent>

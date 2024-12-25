@@ -23,6 +23,9 @@ interface BookingModalProps {
     date: string;
     price: string;
     quantity: string;
+    name: string;
+    parlorId: number;
+    type?: string;
   }) => void;
   asset: Asset;
 }
@@ -62,13 +65,15 @@ export function BookingModal({
       bookedDate: new Date(formData.get("date") as string),
       assertId: asset.id, // Use correct assetId
       assetQty: quantity,
+      status: "PENDING",
+      type: "SERVICE",
+      name: asset.name,
+      parlorId: asset.funeralParlorId ? asset.funeralParlorId : 0,
     };
 
     // Dispatch the booking action
     console.log("Booking Data: ", bookingData);
-    dispatch(saveBooking(bookingData)).then(() => {
-        
-    })
+    dispatch(saveBooking(bookingData)).then(() => {});
 
     // Callback for further actions
     onConfirm({
@@ -76,6 +81,9 @@ export function BookingModal({
       date: formData.get("date") as string,
       price: formData.get("price") as string,
       quantity: formData.get("quantity") as string,
+      name: asset.name,
+      type: "ASSET",
+      parlorId: asset.funeralParlorId ? asset.funeralParlorId : 0,
     });
 
     onClose();
