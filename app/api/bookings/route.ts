@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prismaClient } from "@/app/database/DatabaseClient";
 import { StandardResponse } from "@/app/helpers/types/response.type";
+import { BookingStatus } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,7 +65,6 @@ export async function POST(request: NextRequest) {
       });
       console.log("Saved booking data :", savedBooking);
     } else {
-
       if (!serviceId) {
         const response: StandardResponse = {
           message: "Missing required field: serviceId",
@@ -144,6 +144,9 @@ export async function GET(request: Request) {
       const bookings = await prismaClient.booking.findMany({
         where: { parlorId: parseInt(parlorId, 10) },
         include: { user: { select: { name: true, id: true } } },
+        orderBy: {
+          id: "desc",
+        },
       });
       const response: StandardResponse = {
         code: 200,
@@ -164,6 +167,42 @@ export async function GET(request: Request) {
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching bookings: ", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unexpected error occurred";
+    const response: StandardResponse = {
+      message: errorMessage,
+      code: 500,
+    };
+
+    return NextResponse.json(response);
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { id, status } = await request.json();
+    if (!id || !status) {
+      const response: StandardResponse = {
+        code: 400,
+        message: "Missing required parameters: bookingId and/or status",
+      };
+      return NextResponse.json(response);
+    }
+
+    await prismaClient.booking.update({
+      where: { id: Number.parseInt(id) },
+      data: { status: status as BookingStatus },
+    });
+
+    const response: StandardResponse = {
+      code: 200,
+      message: "Booking status updated successfully",
+    };
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error("Error updating booking status:", error);
 
     const errorMessage =
       error instanceof Error ? error.message : "Unexpected error occurred";
